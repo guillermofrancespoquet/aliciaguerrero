@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planificación Nutricional — Alicia Guerrero</title>
+<link rel="apple-touch-icon" href="Logo.png">
+<meta name="apple-mobile-web-app-title" content="NutriLogos">
+<meta name="application-name" content="NutriLogos">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #fff; color: #1a1a1a; padding: 1.5rem; max-width: 860px; margin: 0 auto; }
+
+  /* ── PLAN SEMANAL ── */
+  .pn-days { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .pn-day-btn { padding: 6px 14px; font-size: 13px; border: 1px solid #ccc; border-radius: 8px; background: transparent; color: #555; cursor: pointer; transition: background 0.15s; }
+  .pn-day-btn:hover { background: #f4f4f4; }
+  .pn-day-btn.active { background: #f0f0f0; color: #111; border-color: #888; font-weight: 500; }
+  .pn-meals { display: grid; gap: 10px; }
+  .pn-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1rem 1.25rem; }
+  .pn-meal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .pn-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 8px; white-space: nowrap; }
+  .badge-d   { background: #EAF3DE; color: #3B6D11; }
+  .badge-a   { background: #E1F5EE; color: #0F6E56; }
+  .badge-me  { background: #EEEDFE; color: #3C3489; }
+  .badge-c   { background: #FAECE7; color: #993C1D; }
+  .badge-ce  { background: #F3E8FF; color: #6B21A8; }
+  .badge-libre { background: #FBEAF0; color: #993556; }
+  .pn-time { font-size: 12px; color: #aaa; }
+  .pn-name { font-size: 15px; font-weight: 500; color: #111; margin-bottom: 4px; }
+  .pn-note { font-size: 12px; color: #888; border-left: 2px solid #ddd; padding-left: 8px; line-height: 1.5; }
+  .pn-extra-tag { display: inline-block; font-size: 11px; font-weight: 500; background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; border-radius: 6px; padding: 2px 8px; margin-bottom: 6px; }
+  .pn-batch-tag  { display: inline-block; font-size: 11px; font-weight: 500; background: #FFF8E1; color: #795700; border: 1px solid #F0D060; border-radius: 6px; padding: 2px 8px; margin-bottom: 6px; }
+  .pn-sport-banner { border-radius: 8px; padding: 8px 12px; font-size: 12px; margin-bottom: 10px; }
+  .pn-sport-banner.fuerza   { background: #E6F1FB; border: 1px solid #B5D4F4; color: #0C447C; }
+  .pn-sport-banner.run      { background: #EAF3DE; border: 1px solid #C0DD97; color: #27500A; }
+  .pn-sport-banner.crossfit { background: #FAEEDA; border: 1px solid #FAC775; color: #633806; }
+  .pn-sport-banner.rest     { background: #F1EFE8; border: 1px solid #D3D1C7; color: #444441; }
+  .pn-libre-banner { background: #FBEAF0; border: 1px solid #F4C0D1; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #72243E; margin-bottom: 10px; }
+  .pn-supp-banner { background: #F3F0FB; border: 1px solid #C9BFEF; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #3C2E7A; margin-bottom: 10px; line-height: 1.7; }
+  .pn-batch-section { background: #FFFDE7; border: 1px solid #F0D060; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .pn-batch-section h3 { font-size: 13px; font-weight: 600; color: #795700; margin-bottom: 8px; }
+  .pn-batch-section ul { padding-left: 1.1rem; font-size: 13px; color: #555; line-height: 1.85; }
+  .pn-batch-section .bc-note { font-size: 12px; color: #888; margin-top: 10px; border-left: 2px solid #F0D060; padding-left: 8px; }
+  .pn-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; }
+  .pn-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #777; }
+  h1 { font-size: 20px; font-weight: 500; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 13px; color: #777; margin-bottom: 1.5rem; }
+
+  /* ── PERFIL DE LA PERSONA ── */
+  .pn-perfil { margin-bottom: 2rem; }
+  .pn-perfil-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 0.25rem; }
+  .pn-perfil-score { font-size: 12px; font-weight: 500; background: #EAF3DE; color: #3B6D11; border: 1px solid #C0DD97; border-radius: 8px; padding: 2px 10px; }
+  .pn-perfil-sub { font-size: 13px; color: #777; margin-bottom: 1rem; }
+  .pn-perfil-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+  @media (max-width: 600px) { .pn-perfil-grid { grid-template-columns: repeat(2, 1fr); } }
+  .pn-metric { background: #f7f7f7; border-radius: 10px; padding: 0.75rem 1rem; }
+  .pn-metric-lbl { font-size: 11px; color: #999; margin-bottom: 3px; }
+  .pn-metric-val { font-size: 18px; font-weight: 500; color: #111; }
+  .pn-metric-sub { font-size: 11px; color: #bbb; margin-top: 2px; }
+  .pn-impresiones { border: 1px solid #e5e5e5; border-radius: 12px; padding: 1rem 1.25rem; }
+  .pn-imp-item { font-size: 13px; color: #444; line-height: 1.65; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; display: flex; gap: 8px; align-items: flex-start; }
+  .pn-imp-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .pn-imp-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+  .pn-imp-dot-green { background: #1D9E75; }
+  .pn-imp-dot-blue  { background: #185FA5; }
+  .pn-imp-dot-amber { background: #BA7517; }
+  .pn-imp-dot-coral { background: #993C1D; }
+  .pn-perfil-divider { border: none; border-top: 1px solid #e5e5e5; margin: 1.5rem 0; }
+  .pn-perfil-section-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  @media (max-width: 600px) { .pn-perfil-section-row { grid-template-columns: 1fr; } }
+  .pn-antro-card { background: #f7f7f7; border-radius: 10px; padding: 0.75rem 1rem; }
+  .pn-antro-card-title { font-size: 11px; font-weight: 500; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+  .pn-antro-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid #eee; color: #555; }
+  .pn-antro-row:last-child { border-bottom: none; }
+  .pn-antro-val { font-weight: 500; color: #111; }
+  .pn-bio-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #eee; }
+  .pn-bio-row:last-child { border-bottom: none; }
+  .pn-bio-label { color: #777; }
+  .pn-bio-val { font-weight: 500; color: #111; }
+  .pn-bio-badge { font-size: 10px; padding: 1px 7px; border-radius: 6px; font-weight: 500; }
+  .bio-normal { background: #EAF3DE; color: #3B6D11; }
+  .bio-alto   { background: #E6F1FB; color: #185FA5; }
+  .bio-bajo   { background: #FBEAF0; color: #993556; }
+  .pn-soma-card { border: 1px solid #e5e5e5; border-radius: 10px; padding: 0.75rem 1rem; display: flex; align-items: center; }
+  .pn-soma-num { text-align: center; }
+  .pn-soma-num-val { font-size: 22px; font-weight: 500; color: #111; }
+  .pn-soma-num-lbl { font-size: 10px; color: #aaa; margin-top: 2px; }
+  .pn-soma-separator { color: #ddd; font-size: 20px; }
+  .section-label { font-size: 12px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.85rem; padding-bottom: 0.4rem; border-bottom: 1px solid #e8e8e8; }
+
+  /* ── LISTA DE COMPRA ── */
+  .pn-shop-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .pn-shop-btn { padding: 6px 14px; font-size: 13px; border: 1px solid #ccc; border-radius: 8px; background: transparent; color: #555; cursor: pointer; transition: background 0.15s; }
+  .pn-shop-btn:hover { background: #f4f4f4; }
+  .pn-shop-btn.active { background: #f0f0f0; color: #111; border-color: #888; font-weight: 500; }
+  .pn-shop-btn.active.cat-prot  { background: #E6F1FB; border-color: #B5D4F4; color: #0C447C; }
+  .pn-shop-btn.active.cat-carb  { background: #FAEEDA; border-color: #FAC775; color: #633806; }
+  .pn-shop-btn.active.cat-fat   { background: #EAF3DE; border-color: #C0DD97; color: #27500A; }
+  .pn-shop-btn.active.cat-extra { background: #F1EFE8; border-color: #D3D1C7; color: #444441; }
+  .pn-shop-list { display: grid; gap: 8px; }
+  .pn-shop-item { border: 1px solid #e5e5e5; border-radius: 10px; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s, opacity 0.15s; }
+  .pn-shop-item.cat-prot  { background: #f5f9fe; }
+  .pn-shop-item.cat-carb  { background: #fefaf5; }
+  .pn-shop-item.cat-fat   { background: #f6fbf2; }
+  .pn-shop-item.cat-extra { background: #f8f8f6; }
+  .pn-shop-item:hover { filter: brightness(0.97); }
+  .pn-shop-item.done { opacity: 0.38; }
+  .pn-shop-item.done .pn-shop-item-name { text-decoration: line-through; color: #aaa; }
+  .pn-shop-item-name { font-size: 13px; font-weight: 500; color: #111; }
+  .pn-shop-item-qty { font-size: 12px; font-weight: 500; color: #555; white-space: nowrap; text-align: right; }
+
+  /* ── INGREDIENTES ENCAPSULADOS EN COMIDAS ── */
+  .pn-ing-list { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; align-items: center; }
+  .pn-ing { display: inline-block; font-size: 12px; background: #f4f4f4; border: 1px solid #e8e8e8; border-radius: 6px; padding: 3px 9px; color: #444; line-height: 1.4; }
+  .pn-ing-full { display: block; width: 100%; border-radius: 8px; font-size: 12px; line-height: 1.65; color: #555; }
+
+  /* ── SUPLEMENTACIÓN ── */
+  .pn-supl-block { background: #F3F0FB; border: 1px solid #C9BFEF; border-radius: 12px; padding: 1rem 1.25rem; }
+  .pn-supl-item { display: flex; gap: 10px; align-items: flex-start; padding: 0.5rem 0; border-bottom: 1px solid #DDD8F5; font-size: 13px; color: #333; line-height: 1.5; }
+  .pn-supl-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .pn-supl-dot { width: 6px; height: 6px; border-radius: 50%; background: #7C5CBF; flex-shrink: 0; margin-top: 6px; }
+
+  /* ── RECETAS ── */
+  .pn-receta { border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
+  .pn-receta-header { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem; cursor: pointer; background: #fafafa; transition: background 0.15s; user-select: none; }
+  .pn-receta-header:hover { background: #f3f3f3; }
+  .pn-receta-title { font-size: 14px; font-weight: 500; color: #111; display: flex; align-items: center; gap: 8px; }
+  .pn-receta-arrow { font-size: 12px; color: #aaa; transition: transform 0.2s; }
+  .pn-receta.open .pn-receta-arrow { transform: rotate(90deg); }
+  .pn-receta-body { display: none; padding: 1rem 1.25rem; border-top: 1px solid #e5e5e5; background: #fff; }
+  .pn-receta.open .pn-receta-body { display: block; }
+  .pn-receta-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .pn-receta-meta-pill { font-size: 11px; background: #f4f4f4; border: 1px solid #e8e8e8; border-radius: 6px; padding: 3px 10px; color: #555; }
+  .pn-receta-section { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.5rem; margin-top: 0.85rem; }
+  .pn-receta-ings { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.5rem; }
+  .pn-receta-ing { font-size: 12px; background: #f4f4f4; border: 1px solid #e8e8e8; border-radius: 6px; padding: 3px 10px; color: #444; }
+  .pn-receta-steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .pn-receta-step { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #444; line-height: 1.55; }
+  .pn-receta-step-num { min-width: 22px; height: 22px; border-radius: 50%; background: #f0f0f0; border: 1px solid #e0e0e0; font-size: 11px; font-weight: 600; color: #666; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .pn-receta-tip { font-size: 12px; color: #888; border-left: 2px solid #ddd; padding-left: 8px; margin-top: 0.75rem; line-height: 1.5; }
+
+  /* ── BOTÓN IMPRIMIR ── */
+  .pn-print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #0d3d4f;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .pn-print-btn:hover { background: #0f4d63; }
+
+  /* ── TABLA RESUMEN ── */
+  .pn-tabla-wrap { border-radius: 12px; overflow-x: auto; border: 1px solid #B5D4F4; display: block; }
+  .pn-tabla { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 860px; }
+  .pn-tabla th { background: #0d3d4f; color: #fff; font-weight: 600; padding: 9px 10px; text-align: center; border: 1px solid #1a4a5e; font-size: 12px; width: 130px; }
+  .pn-tabla th:first-child { width: 40px; min-width: 40px; }
+  .pn-tabla th small { color: #b8d8e4; font-weight: 400; }
+  .pn-tabla td { padding: 8px 10px; border: 1px solid #dce8f0; vertical-align: middle; line-height: 1.5; text-align: center; width: 130px; }
+  .pn-tabla td:first-child { width: 40px; min-width: 40px; background: #f7f9fb; text-align: center; }
+  .td-libre { background: #fbeaf0 !important; color: #72243E; font-style: italic; }
+  .td-vacio { color: #aaa; font-style: italic; text-align: center; }
+  .row-d  td { background: #f4f9ee; }
+  .row-a  td { background: #f0faf5; }
+  .row-me td { background: #f2f1ff; }
+  .row-c  td { background: #fef7f5; }
+  .row-ce td { background: #faf5ff; }
+
+  /* ── IMPRESIÓN ── */
+  #printTitle { display: none; }
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    html, body {
+      width: 297mm;
+      height: 210mm;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea {
+      position: fixed;
+      top: 0; left: 0;
+      width: 297mm;
+      height: 210mm;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10mm 12mm;
+      box-sizing: border-box;
+    }
+    #printTitle {
+      display: flex !important;
+      width: 100%;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6mm;
+      padding-bottom: 4mm;
+      border-bottom: 2px solid #0d3d4f;
+    }
+    .pn-print-btn { display: none !important; }
+    .pn-tabla-wrap {
+      border-radius: 0;
+      border: 2px solid #1a2e44;
+      width: 100%;
+      overflow: visible;
+      display: block;
+    }
+    .pn-tabla {
+      width: 100%;
+      min-width: unset;
+      border-collapse: collapse;
+      font-size: 10px;
+      font-family: system-ui, sans-serif;
+      table-layout: fixed;
+    }
+    .pn-tabla th {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      background: #0d3d4f !important; color: #ffffff !important;
+      font-size: 9.5px; font-weight: 700; padding: 7px 5px;
+      text-align: center; border: 1px solid #1a4a5e;
+      letter-spacing: 0.02em; width: auto;
+    }
+    .pn-tabla th:first-child { width: 32px; }
+    .pn-tabla th small { color: #b8d8e4; font-weight: 400; font-size: 8px; }
+    .pn-tabla td {
+      padding: 6px 5px; border: 1px solid #d0d8e0;
+      vertical-align: middle; line-height: 1.45;
+      text-align: center; font-size: 10px; width: auto;
+    }
+    .pn-tabla td:first-child { width: 32px; background: #f7f9fb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .row-d  td { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #f0f8e8 !important; }
+    .row-a  td { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #e8f8f2 !important; }
+    .row-me td { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #f0eeff !important; }
+    .row-c  td { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff5f0 !important; }
+    .row-ce td { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #f8f0ff !important; }
+    .td-libre { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fbeaf0 !important; color: #72243E !important; font-style: italic; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Planificación Nutricional — Alicia Guerrero</h1>
+<p class="subtitle">Recomposición corporal · Base plant-forward · Fútbol de competición</p>
+
+<!-- BLOQUE DESCRIPCIÓN CLIENTE -->
+<div style="border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;background:#fafafa;">
+  <div style="font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Descripción del cliente</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:12px;color:#333;">
+      <span style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;">Perfil</span>
+      Mujer · 14 años · 153 cm · 61,85 kg
+    </div>
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:12px;color:#333;">
+      <span style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;">Contexto</span>
+      Estudiante de ESO · Futbolista (lateral derecho)
+    </div>
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:12px;color:#333;">
+      <span style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;">Objetivo</span>
+      Recomposición corporal · Rendimiento deportivo
+    </div>
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:12px;color:#333;">
+      <span style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;">Hábitos</span>
+      No fuma · No alcohol · Sin datos de sueño
+    </div>
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:12px;color:#333;">
+      <span style="color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;">Aversiones / exclusiones</span>
+      Remolacha · Hervido · Hummus
+    </div>
+  </div>
+</div>
+
+<!-- BLOQUE OBJETIVO -->
+<div style="background:#EBF3FB;border:1.5px solid #A8C8E8;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
+  <div style="font-size:11px;font-weight:600;color:#1a4a72;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Objetivo</div>
+  <p style="font-size:14px;font-weight:600;color:#0C3358;line-height:1.65;">Mejorar la composición corporal a través de una pérdida de grasa progresiva y controlada, acompañada de una pequeña reducción de peso, preservando la masa muscular existente. El contexto deportivo del fútbol de competición (3 entrenamientos/semana + partidos) es un aliado clave, especialmente de cara al verano, donde es importante mantener la actividad física para no perder las adaptaciones conseguidas. La estrategia combina un leve déficit calórico en días de descanso con ingesta suficiente en días de entreno para sostener el rendimiento y la recuperación. Objetivo: mejorar la composición corporal de forma sostenible mediante hábitos alimentarios sólidos y progresivos.</p>
+</div>
+
+<!-- PERFIL -->
+<div class="pn-perfil">
+
+  <div class="pn-perfil-header">
+    <span style="font-size:15px;font-weight:500;color:#111">Perfil de la persona</span>
+  </div>
+  <p class="pn-perfil-sub">Alicia Guerrero · 14 años · Mujer · Valorada el 21/05/2026 por Guillermo Francés</p>
+
+  <div class="pn-perfil-grid" style="margin-bottom:10px">
+    <div class="pn-metric"><div class="pn-metric-lbl">Peso actual</div><div class="pn-metric-val">61,85 kg</div><div class="pn-metric-sub">IMC 26,4 · Elevado</div></div>
+    <div class="pn-metric"><div class="pn-metric-lbl">Talla</div><div class="pn-metric-val">153 cm</div><div class="pn-metric-sub">Adolescente en desarrollo</div></div>
+    <div class="pn-metric"><div class="pn-metric-lbl">% Grasa corporal</div><div class="pn-metric-val">20,4 %</div><div class="pn-metric-sub">Normal · Adecuado para futbolista</div></div>
+    <div class="pn-metric"><div class="pn-metric-lbl">Peso sin grasa (LBM)</div><div class="pn-metric-val">49,2 kg</div><div class="pn-metric-sub">Base muscular correcta</div></div>
+  </div>
+  <div class="pn-perfil-grid" style="margin-bottom:10px">
+    <div class="pn-metric"><div class="pn-metric-lbl">TMB (bioimpedancia)</div><div class="pn-metric-val">1.432 kcal</div><div class="pn-metric-sub">FA ≈ 1,55 → TEE ~2.220 kcal</div></div>
+    <div class="pn-metric"><div class="pn-metric-lbl">Edad metabólica</div><div class="pn-metric-val">18 años</div><div class="pn-metric-sub">Insuficiente (vs. 14 real) → a mejorar</div></div>
+    <div class="pn-metric"><div class="pn-metric-lbl">Agua corporal</div><div class="pn-metric-val">54,6 %</div><div class="pn-metric-sub">Normal</div></div>
+    <div class="pn-metric"><div class="pn-metric-lbl">Índice grasa subcutánea</div><div class="pn-metric-val">17,5 %</div><div class="pn-metric-sub">Bajo · Favorable</div></div>
+  </div>
+
+  <div style="margin-bottom:10px">
+    <div class="section-label">Datos bioimpedancia</div>
+    <div class="pn-antro-card">
+      <div class="pn-antro-card-title">Composición corporal (Arboleaf · 21/05/2026)</div>
+      <div class="pn-bio-row"><span class="pn-bio-label">Peso</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">61,85 kg</span><span class="pn-bio-badge bio-alto">Alto</span></div></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">IMC</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">26,4</span><span class="pn-bio-badge bio-alto">Alto</span></div></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">Grasa corporal</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">20,4 %</span><span class="pn-bio-badge bio-normal">Cumplida</span></div></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">TMB</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">1.432 kcal</span><span class="pn-bio-badge bio-normal">Cumplida</span></div></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">Peso sin grasa</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">49,2 kg</span><span class="pn-bio-badge bio-alto">Alto</span></div></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">Índice grasa subcutánea</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">17,5 %</span><span class="pn-bio-badge bio-bajo">Bajo</span></div></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">Agua corporal</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">54,6 %</span><span class="pn-bio-badge bio-normal">Cumplida</span></div></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">Tipo de cuerpo</span><span class="pn-bio-val">Musculatura estándar</span></div>
+      <div class="pn-bio-row"><span class="pn-bio-label">Edad metabólica</span><div style="display:flex;gap:6px;align-items:center"><span class="pn-bio-val">18 años</span><span class="pn-bio-badge bio-bajo">Insuficiente</span></div></div>
+    </div>
+  </div>
+
+  <div style="margin-top:10px">
+    <div class="section-label">Impresiones del profesional</div>
+    <div class="pn-impresiones">
+      <div class="pn-imp-item"><div class="pn-imp-dot pn-imp-dot-green"></div><div><strong>Composición corporal en proceso de mejora.</strong> El % de grasa (20,4%) está dentro del rango normal para una futbolista adolescente y hay margen para rebajarlo ligeramente. La base de masa magra (49,2 kg LBM) es buena y el contexto deportivo es muy favorable, especialmente si se mantiene la actividad durante el verano.</div></div>
+      <div class="pn-imp-item"><div class="pn-imp-dot pn-imp-dot-blue"></div><div><strong>Objetivo: pérdida de grasa controlada con pequeña reducción de peso.</strong> Se busca una pérdida de grasa progresiva y no brusca, acompañada de una ligera reducción de peso. No es un déficit agresivo — el foco está en mejorar la ratio grasa/músculo sin comprometer el rendimiento deportivo.</div></div>
+      <div class="pn-imp-item"><div class="pn-imp-dot pn-imp-dot-amber"></div><div><strong>IMC algo elevado pero en contexto.</strong> El IMC de 26,4 se explica en parte por la masa magra y el desarrollo adolescente. Conviene monitorizar su evolución en las revisiones. Con la mejora de composición corporal, irá normalizándose de forma natural.</div></div>
+      <div class="pn-imp-item"><div class="pn-imp-dot pn-imp-dot-coral"></div><div><strong>Prioridad: proteína suficiente y carbohidratos estratégicos.</strong> Con ~100 g/día de proteína (1,6 g/kg) y timing de hidratos alrededor del entrenamiento, el plan maximiza la recuperación muscular y el rendimiento en partidos. Mantener actividad en verano es clave para no perder las adaptaciones logradas.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="pn-perfil-divider">
+
+<!-- TABLA RESUMEN SEMANAL -->
+<div id="seccion-resumen" style="margin-bottom:1.5rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:0.85rem;padding-bottom:0.4rem;border-bottom:1px solid #e8e8e8;">
+    <div style="font-size:12px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:0.06em;">Menú semanal de un vistazo</div>
+    <button class="pn-print-btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+  </div>
+  <div id="printArea">
+  <div id="printTitle" style="align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #0d3d4f;">
+    <div style="font-size:16px;font-weight:700;color:#0d3d4f;">Planificación Nutricional — Alicia Guerrero</div>
+    <div style="font-size:11px;color:#666;">Valoración 21/05/2026 · Guillermo Francés · Próxima revisión: 29/06/2026</div>
+  </div>
+  <div class="pn-tabla-wrap">
+    <table class="pn-tabla">
+      <thead>
+        <tr>
+          <th style="min-width:70px">Comida</th>
+          <th>Lunes<br><small style="font-weight:400;color:#b8d8e4">⚽ Entreno</small></th>
+          <th>Martes<br><small style="font-weight:400;color:#b8d8e4">😴 Descanso</small></th>
+          <th>Miércoles<br><small style="font-weight:400;color:#b8d8e4">⚽ Entreno</small></th>
+          <th>Jueves<br><small style="font-weight:400;color:#b8d8e4">😴 Descanso</small></th>
+          <th>Viernes<br><small style="font-weight:400;color:#b8d8e4">⚽ Entreno</small></th>
+          <th>Sábado<br><small style="font-weight:400;color:#b8d8e4">🏆 Partido</small></th>
+          <th>Domingo<br><small style="font-weight:400;color:#b8d8e4">😴 Descanso</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-d">
+          <td><span class="pn-badge badge-d">D</span></td>
+          <td>Overnight oats + ½ plátano</td>
+          <td>Tostadas integrales + huevo revuelto + ½ aguacate</td>
+          <td>Batido avena + frutos rojos</td>
+          <td>Overnight oats + ½ plátano</td>
+          <td>Tostadas integrales + pavo + ½ aguacate</td>
+          <td>Batido avena + tortitas de arroz con mermelada</td>
+          <td>Tortitas de avena y plátano</td>
+        </tr>
+        <tr class="row-a">
+          <td><span class="pn-badge badge-a">A</span></td>
+          <td>½ bocadillo integral + tomate + jamón cocido + fruta</td>
+          <td>2 frutas + frutos secos</td>
+          <td>½ bocadillo integral + pollo asado + tomate + fruta</td>
+          <td>½ bocadillo integral + tomate + jamón cocido + fruta</td>
+          <td>½ bocadillo integral + queso fresco + pavo + fruta</td>
+          <td>Barrita de cereales + plátano (pre-partido)</td>
+          <td>—</td>
+        </tr>
+        <tr class="row-c">
+          <td><span class="pn-badge badge-c">C</span></td>
+          <td>Pasta integral + tomate + pollo + verduras</td>
+          <td>Arroz integral + pollo asado + brócoli</td>
+          <td>Bowl arroz + lentejas + pavo en tiras + verduras</td>
+          <td>Ensalada de pasta al pesto + pollo + cherry</td>
+          <td>Ensalada de alubias + atún + tomate + pimiento</td>
+          <td>Gazpacho + pollo plancha + patatas al horno</td>
+          <td>Potaje de legumbres al gusto</td>
+        </tr>
+        <tr class="row-me">
+          <td><span class="pn-badge badge-me">Me</span></td>
+          <td>Yogur soja + miel + granola (pre-entreno) · o batido post si tarde</td>
+          <td>½ bocadillo pavo + fruta</td>
+          <td>2 tortitas arroz + plátano + miel (pre-entreno)</td>
+          <td>Yogur soja + miel + granola</td>
+          <td>2 tortitas arroz + plátano + miel (pre-entreno)</td>
+          <td>Galletas de avena + yogur de soja</td>
+          <td>Bowl de frutas + frutos secos</td>
+        </tr>
+        <tr class="row-ce">
+          <td><span class="pn-badge badge-ce">Ce</span></td>
+          <td>Ensalada tomate + atún + cuscús</td>
+          <td>Filete pescado blanco + patatas + ensalada</td>
+          <td>Fajitas de pollo con tortilla integral</td>
+          <td>Merluza al horno + patatas + puré verduras</td>
+          <td>Pizza rápida tortilla avena (varios tipos)</td>
+          <td class="td-libre">🎉 Cena libre</td>
+          <td>Ensalada verde + huevo cocido + pan integral</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:#aaa;">~2.000–2.200 kcal días entreno/partido · ~1.900–2.000 kcal días descanso · ~100 g proteína/día · FA 1,55</div>
+</div>
+
+<!-- MENÚ POR DÍAS -->
+<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e5e5e5;">
+  <div class="section-label">Menú desarrollado por días</div>
+  <div class="pn-days" id="dayTabs"></div>
+  <div id="dayView"></div>
+  <div class="pn-legend">
+    <span style="font-size:12px;color:#aaa;margin-right:4px;">Comidas:</span>
+    <span class="pn-legend-item"><span class="pn-badge badge-d">D</span> Desayuno</span>
+    <span class="pn-legend-item"><span class="pn-badge badge-a">A</span> Almuerzo</span>
+    <span class="pn-legend-item"><span class="pn-badge badge-me">Me</span> Merienda</span>
+    <span class="pn-legend-item"><span class="pn-badge badge-c">C</span> Comida</span>
+    <span class="pn-legend-item"><span class="pn-badge badge-ce">Ce</span> Cena</span>
+  </div>
+</div>
+
+<!-- LISTA DE COMPRA -->
+<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e5e5e5;">
+  <div class="section-label">Lista de compra semanal</div>
+  <div class="pn-shop-tabs" id="shopTabs"></div>
+  <div id="shopView"></div>
+</div>
+
+<!-- SELECCIÓN DE ALIMENTOS -->
+<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e5e5e5;">
+  <div class="section-label">Selección de alimentos</div>
+  <p style="font-size:12px;color:#999;margin-bottom:1rem;line-height:1.6;">Dentro de cada grupo de alimentos hay mejores y peores opciones. Esta guía te ayuda a elegir siempre la opción más favorable para tu objetivo. Lee de izquierda a derecha: la primera opción es la ideal.</p>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+
+    <!-- YOGURES -->
+    <div style="border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;">
+      <div style="background:#f7f9fb;padding:8px 14px;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e5e5e5;">🥛 Yogures y lácteos</div>
+      <div style="padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+        <div style="background:#E6F1FB;border:1px solid #B5D4F4;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:#0C447C;">Yogur de soja natural</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#EAF3DE;border:1px solid #C0DD97;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#27500A;">Yogur griego desnatado</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#633806;">Yogur natural 0%</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#F1EFE8;border:1px solid #D3D1C7;border-radius:8px;padding:5px 12px;font-size:12px;color:#555;">Yogur griego normal</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#fbeaf0;border:1px solid #F4C0D1;border-radius:8px;padding:5px 12px;font-size:12px;color:#72243E;">Yogur griego entero / de sabores</div>
+        <div style="width:100%;margin-top:6px;font-size:11px;color:#aaa;line-height:1.5;">El yogur de soja es la mejor opción: sin colesterol, con proteína vegetal completa, sin lactosa. A igualdad de proteína, gana siempre al yogur lácteo.</div>
+      </div>
+    </div>
+
+    <!-- PAN -->
+    <div style="border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;">
+      <div style="background:#f7f9fb;padding:8px 14px;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e5e5e5;">🍞 Pan y tostadas</div>
+      <div style="padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+        <div style="background:#E6F1FB;border:1px solid #B5D4F4;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:#0C447C;">Pan integral masa madre</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#EAF3DE;border:1px solid #C0DD97;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#27500A;">Pan de semillas 100% integral</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#633806;">Pan integral de molde</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#F1EFE8;border:1px solid #D3D1C7;border-radius:8px;padding:5px 12px;font-size:12px;color:#555;">Pan blanco de molde</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#fbeaf0;border:1px solid #F4C0D1;border-radius:8px;padding:5px 12px;font-size:12px;color:#72243E;">Bollería / pan blanco refinado</div>
+        <div style="width:100%;margin-top:6px;font-size:11px;color:#aaa;line-height:1.5;">El primer ingrediente debe ser "harina integral", no "harina de trigo". Si pone "con cereales" o "multigrano" sin especificar integral, normalmente es pan blanco con colorante.</div>
+      </div>
+    </div>
+
+    <!-- BEBIDA VEGETAL -->
+    <div style="border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;">
+      <div style="background:#f7f9fb;padding:8px 14px;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e5e5e5;">🌱 Bebidas vegetales</div>
+      <div style="padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+        <div style="background:#E6F1FB;border:1px solid #B5D4F4;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:#0C447C;">Bebida de soja sin azúcar</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#EAF3DE;border:1px solid #C0DD97;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#27500A;">Bebida de avena sin azúcar</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#633806;">Bebida de almendra sin azúcar</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#fbeaf0;border:1px solid #F4C0D1;border-radius:8px;padding:5px 12px;font-size:12px;color:#72243E;">Cualquier bebida vegetal con azúcares añadidos</div>
+        <div style="width:100%;margin-top:6px;font-size:11px;color:#aaa;line-height:1.5;">La soja es la única bebida vegetal con perfil proteico completo (6–8 g/vaso). Siempre elegir la versión sin azúcar añadido — revisar etiqueta que no lleve "azúcar" o "sirope" entre los primeros ingredientes.</div>
+      </div>
+    </div>
+
+    <!-- FUENTES DE PROTEÍNA -->
+    <div style="border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;">
+      <div style="background:#f7f9fb;padding:8px 14px;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e5e5e5;">💪 Proteína en el almuerzo</div>
+      <div style="padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+        <div style="background:#E6F1FB;border:1px solid #B5D4F4;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:#0C447C;">Pavo cocido >90% carne</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#EAF3DE;border:1px solid #C0DD97;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#27500A;">Jamón cocido >90% carne</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#633806;">Jamón cocido estándar</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#fbeaf0;border:1px solid #F4C0D1;border-radius:8px;padding:5px 12px;font-size:12px;color:#72243E;">Fiambre de pavo / mortadela / chopped</div>
+        <div style="width:100%;margin-top:6px;font-size:11px;color:#aaa;line-height:1.5;">Buscar siempre en el etiquetado que el porcentaje de carne sea >90%. Los fiambres con menos carne están rellenos de almidones, féculas y aditivos que aportan poco nutricionalmente.</div>
+      </div>
+    </div>
+
+    <!-- ACEITES Y GRASAS -->
+    <div style="border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;">
+      <div style="background:#f7f9fb;padding:8px 14px;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #e5e5e5;">🫒 Aceites y grasas para cocinar</div>
+      <div style="padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;">
+        <div style="background:#E6F1FB;border:1px solid #B5D4F4;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:#0C447C;">AOVE (aceite oliva virgen extra)</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#EAF3DE;border:1px solid #C0DD97;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#27500A;">Aceite de oliva (virgen)</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#633806;">Aceite de girasol alto oleico</div>
+        <span style="color:#ccc;font-size:16px;font-weight:300;">›</span>
+        <div style="background:#fbeaf0;border:1px solid #F4C0D1;border-radius:8px;padding:5px 12px;font-size:12px;color:#72243E;">Mantequilla / margarina / aceite de coco</div>
+        <div style="width:100%;margin-top:6px;font-size:11px;color:#aaa;line-height:1.5;">El AOVE es la grasa de referencia: rica en oleocantal, polifenoles y ácido oleico. Usarlo en crudo o a baja temperatura para preservar sus propiedades. En casa, siempre AOVE.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUPLEMENTACIÓN -->
+<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e5e5e5;">
+  <div class="section-label">Suplementación recomendada</div>
+  <div class="pn-supl-block">
+    <div class="pn-supl-item">
+      <div class="pn-supl-dot"></div>
+      <div><strong>Creatina monohidrato</strong> — 5 g diarios (opcional). Puede tomarse en cualquier momento del día, con agua o mezclada en yogur/batido. Apoya la recuperación muscular y el rendimiento en esprints repetidos propios del fútbol. Según las revisiones actuales de la literatura científica, la creatina es segura en deportistas adolescentes cuando se usa a dosis estándar.</div>
+    </div>
+  </div>
+</div>
+
+<!-- RECETAS -->
+<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e5e5e5;">
+  <div class="section-label">Recetas</div>
+  <div id="recetasList"></div>
+</div>
+
+<!-- PRÓXIMA REVISIÓN -->
+<div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e5e5e5;">
+  <div class="section-label">Próxima revisión</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:#fafafa;border:1px solid #e5e5e5;border-radius:12px;padding:1rem 1.25rem;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="font-size:28px;">📅</div>
+      <div>
+        <div style="font-size:16px;font-weight:500;color:#111;">29 de junio de 2026 · 17:00 h</div>
+        <div style="font-size:12px;color:#999;margin-top:3px;">Valoración antropométrica + bioimpedancia · Revisión de adherencia y sensaciones · Ajuste de plan si procede</div>
+      </div>
+    </div>
+    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Revisi%C3%B3n+nutricional+%E2%80%94+Alicia+Guerrero&dates=20260629T150000Z%2F20260629T160000Z&details=Valoraci%C3%B3n+antropom%C3%A9trica+%2B+bioimpedancia.+Revisi%C3%B3n+de+adherencia+y+sensaciones.+Ajuste+de+plan+si+procede.+Profesional%3A+Guillermo+Fran%C3%A9s+%E2%80%94+NUTRILOGOS&location=NUTRILOGOS" target="_blank" style="display:inline-flex;align-items:center;gap:7px;background:#0d3d4f;color:#fff;text-decoration:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:500;letter-spacing:0.02em;white-space:nowrap;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Añadir al calendario
+    </a>
+  </div>
+</div>
+
+<script>
+const days = [
+  {
+    short: "Lun",
+    full: "Lunes",
+    sport: "⚽ Entrenamiento de fútbol",
+    sportClass: "run",
+    sportBanner: "Sesión tarde · ~2.100 kcal · ~100 g proteína · ↑ hidratos pre-entreno",
+    suppl: null,
+    libre: false,
+    meals: [
+      {
+        type: "D",
+        time: "7:30–8:30",
+        name: "Overnight oats",
+        tags: [],
+        desc: "½ taza copos avena (40 g)\n1 vaso bebida vegetal (250 ml)\n1 yogur de soja natural (125 g)\n1 cda semillas (chía, lino...)\n1 cda miel o mermelada\n½ plátano en rodajas o frutos rojos",
+        note: "Preparar la noche anterior. Opción: añadir cacao puro o canela para variar. Explicado en Recetas."
+      },
+      {
+        type: "A",
+        time: "10:30–11:00",
+        name: "½ bocadillo + fruta",
+        tags: [],
+        desc: "½ bocadillo pan rústico o integral\nTomate en rodajas\nJamón cocido (pavo >90%)\n1 pieza de fruta",
+        note: "Bocadillo portable para el instituto. Fruta según temporada: manzana, pera, mandarina."
+      },
+      {
+        type: "C",
+        time: "14:00–14:30",
+        name: "Pasta integral con tomate y pollo",
+        tags: [],
+        desc: "75 g pasta integral en crudo (~2 tazas cocida)\nSalsa de tomate casera o triturado\n1 filete mediano pollo a la plancha\n1 taza verduras salteadas (berenjena, calabacín, pimiento)\n1 cda AOVE",
+        note: "Usar pechuga asada si queda del día anterior. Variar verduras según disponibilidad."
+      },
+      {
+        type: "Me",
+        time: "17:00–17:30 (pre-entreno ~60–90 min antes)",
+        name: "Yogur de soja + granola (pre-entreno)",
+        tags: [],
+        desc: "1 yogur de soja natural (125 g)\n1 cdita miel\n1 puñado pequeño granola sin azúcares\no bien: 1 rebanada pan integral + mermelada",
+        note: "Si el entreno es más tarde, puede ser después: batido sencillo (bebida vegetal + plátano) o yogur + pan con mermelada."
+      },
+      {
+        type: "Ce",
+        time: "21:00–21:30",
+        name: "Ensalada de atún con cuscús",
+        tags: [],
+        desc: "Base de tomate, pepino y espinacas\n1 lata atún al natural (escurrida)\n½ taza cuscús cocido (125 g)\n1 puñado picatostes\n1 cda AOVE + zumo limón",
+        note: "Cena ligera post-entreno. El cuscús aporta carbohidratos para la recuperación."
+      }
+    ],
+    batchCooking: null
+  },
+  {
+    short: "Mar",
+    full: "Martes",
+    sport: "😴 Descanso activo",
+    sportClass: "rest",
+    sportBanner: "Sin entrenamiento · ~1.950 kcal · ~100 g proteína · ↓ hidratos",
+    suppl: null,
+    libre: false,
+    meals: [
+      {
+        type: "D",
+        time: "7:30–8:30",
+        name: "Tostadas con huevo y aguacate",
+        tags: [],
+        desc: "2 rebanadas pan integral\n1 huevo revuelto\n½ aguacate\n1 pieza de fruta",
+        note: "Desayuno más completo en día de descanso. Aguacate aporta grasas saludables y saciedad."
+      },
+      {
+        type: "A",
+        time: "10:30–11:00",
+        name: "Frutas y frutos secos",
+        tags: [],
+        desc: "2 piezas de fruta (plátano + manzana o pera)\n1 puñado frutos secos",
+        note: "Almuerzo ligero en día sin entreno. Mantiene energía sin sobrecargar."
+      },
+      {
+        type: "C",
+        time: "14:00–14:30",
+        name: "Bowl de arroz integral con pollo y brócoli",
+        tags: [],
+        desc: "1,5 tazas arroz integral cocido (125 g en crudo)\n2 filetes pechuga pollo asada\n1 puñado brócoli al vapor o salteado\n1 yogur griego ligero (de postre)",
+        note: "Preparar doble ración de pollo para reutilizar en almuerzo del miércoles. No olvidar el yogur."
+      },
+      {
+        type: "Me",
+        time: "17:00–17:30",
+        name: "½ bocadillo con pavo + fruta",
+        tags: [],
+        desc: "½ bocadillo pan integral\nPavo >90%\nJamón cocido o queso fresco\n1 pieza de fruta",
+        note: "Merienda saciante en día de descanso. Combina proteína y carbohidratos moderados."
+      },
+      {
+        type: "Ce",
+        time: "21:00–21:30",
+        name: "Filete de pescado blanco con patatas",
+        tags: [],
+        desc: "1 filete pescado blanco (merluza, dorada, lubina)\n2 patatas medianas asadas (horno o air fryer)\nEnsalada mixta (tomate, pepino, maíz, cebolla, pimiento)\n1 cda AOVE",
+        note: "Nota: preparar overnight oats para el desayuno del miércoles antes de dormir."
+      }
+    ],
+    batchCooking: null
+  },
+  {
+    short: "Mié",
+    full: "Miércoles",
+    sport: "⚽ Entrenamiento de fútbol",
+    sportClass: "run",
+    sportBanner: "Sesión tarde · ~2.150 kcal · ~100 g proteína · ↑ hidratos pre-entreno",
+    suppl: null,
+    libre: false,
+    meals: [
+      {
+        type: "D",
+        time: "7:30–8:30",
+        name: "Batido rápido de avena y frutos rojos",
+        tags: [],
+        desc: "1 vaso bebida vegetal\n½ taza copos de avena\n1 puñado frutos rojos congelados\n1 plátano pequeño o ½ plátano maduro",
+        note: "Batido rápido para mañanas con prisa. Se puede triturar en 2 minutos. Alternativa: overnight oats preparadas el día anterior."
+      },
+      {
+        type: "A",
+        time: "10:30–11:00",
+        name: "½ bocadillo con pollo asado",
+        tags: [],
+        desc: "½ bocadillo pan de semillas o integral\nPollo asado del día anterior (resto de la pechuga)\nTomate en rodajas\n1 pieza de fruta",
+        note: "Aprovechar el pollo preparado el martes. Bocadillo portable y práctico para el instituto."
+      },
+      {
+        type: "C",
+        time: "14:00–14:30",
+        name: "Bowl de arroz + lentejas + pavo en tiras",
+        tags: [],
+        desc: "1 taza arroz integral cocido (125 g en crudo)\n½ taza lentejas o garbanzos cocidos\n1 filete grande pavo en tiras\nVerduras salteadas al gusto\n1 cda AOVE",
+        note: "Comida alta en carbohidratos y proteína para rendir en el entreno de tarde."
+      },
+      {
+        type: "Me",
+        time: "17:00 (pre-entreno ~60 min antes)",
+        name: "Tortitas de arroz con plátano y miel 🌟",
+        tags: [],
+        desc: "2 tortitas de arroz\n½ plátano maduro (en rodajas)\n1 cdita miel",
+        note: "Snack pre-entreno ligero y fácil de digerir. El plátano y la miel dan energía rápida para la sesión."
+      },
+      {
+        type: "Ce",
+        time: "21:00–21:30",
+        name: "Fajitas de pollo 🌯",
+        tags: [],
+        desc: "1 pechuga de pollo fileteada\n½ pimiento rojo + ½ pimiento verde\n½ cebolla\n2 tortillas integrales o de avena\n1 aguacate en dados\n1 cdita pimentón + comino + sal + AOVE",
+        note: "¡Cena favorita! Ver receta completa en sección Recetas. Se puede sustituir el aguacate por yogur de soja natural si no hay."
+      }
+    ],
+    batchCooking: null
+  },
+  {
+    short: "Jue",
+    full: "Jueves",
+    sport: "😴 Descanso activo",
+    sportClass: "rest",
+    sportBanner: "Sin entrenamiento · ~1.950 kcal · ~100 g proteína · Recuperación",
+    suppl: null,
+    libre: false,
+    meals: [
+      {
+        type: "D",
+        time: "7:30–8:30",
+        name: "Overnight oats",
+        tags: [],
+        desc: "½ taza copos avena (40 g)\n1 vaso bebida vegetal (250 ml)\n1 yogur de soja natural\n1 cda semillas\n1 cdita miel\n½ plátano o frutos rojos",
+        note: "Preparar la noche anterior (miércoles). Misma receta que el lunes. Explicado en Recetas."
+      },
+      {
+        type: "A",
+        time: "10:30–11:00",
+        name: "½ bocadillo con tomate + jamón cocido",
+        tags: [],
+        desc: "½ bocadillo pan rústico\nTomate en rodajas\nJamón cocido (pavo >90%)\n1 pieza de fruta",
+        note: "Bocadillo clásico. Mantiene el patrón de almuerzo portable para el instituto."
+      },
+      {
+        type: "C",
+        time: "14:00–14:30",
+        name: "Ensalada de pasta al pesto con pollo",
+        tags: [],
+        desc: "75 g pasta integral en crudo (~2 tazas cocida)\n2 cdas pesto (o pesto vegano)\n1 filete pollo a la plancha cortado en tiras\nTomate cherry\nEspinacas frescas\n1 cdita piñones (opcional)\n1 cda AOVE",
+        note: "Ensalada de pasta fría, ideal para hacer en 15 min. Puede prepararse templada o fría."
+      },
+      {
+        type: "Me",
+        time: "17:00–17:30",
+        name: "Yogur de soja + miel + granola",
+        tags: [],
+        desc: "1 yogur de soja natural (125 g)\n1 cdita miel\n1 puñado pequeño granola sin azúcares",
+        note: "Merienda equilibrada en día de descanso. Proteína del yogur + carbohidratos de granola."
+      },
+      {
+        type: "Ce",
+        time: "21:00–21:30",
+        name: "Merluza al horno con patatas y puré de verduras",
+        tags: [],
+        desc: "1 filete merluza al horno o plancha\n2 patatas grandes al horno\n1 taza grande puré de verduras (calabacín, zanahoria, puerro)\n1 cda AOVE\nEspecias al gusto",
+        note: "Nota: preparar overnight oats para el desayuno del viernes. Guardar 1 patata para la ensalada del viernes."
+      }
+    ],
+    batchCooking: null
+  },
+  {
+    short: "Vie",
+    full: "Viernes",
+    sport: "⚽ Entrenamiento de fútbol",
+    sportClass: "run",
+    sportBanner: "Sesión tarde · ~2.150 kcal · ~100 g proteína · ↑ hidratos pre-entreno",
+    suppl: null,
+    libre: false,
+    meals: [
+      {
+        type: "D",
+        time: "7:30–8:30",
+        name: "Tostadas con pavo y aguacate",
+        tags: [],
+        desc: "2 rebanadas pan integral\nFiambre de pavo >90%\nTomate en rodajas\n½ aguacate\n1 pieza de fruta",
+        note: "Sin hummus (aversión). Se sustituye por aguacate + pavo, igual de práctico y saciante."
+      },
+      {
+        type: "A",
+        time: "10:30–11:00",
+        name: "½ bocadillo con queso fresco + pavo",
+        tags: [],
+        desc: "½ bocadillo pan de semillas o integral\nQueso fresco o pavo >90%\n1 pieza de fruta",
+        note: "Almuerzo portable para el instituto. Variación del patrón habitual."
+      },
+      {
+        type: "C",
+        time: "14:00–14:30",
+        name: "Ensalada de alubias con atún",
+        tags: [],
+        desc: "½ bote alubias blancas cocidas (1 taza)\n1 lata atún al natural (escurrida)\nTomate cherry\nCebolla morada\nPimiento verde\nPatata cocida del jueves (opcional)\n1 cda AOVE + vinagre o limón",
+        note: "Ensalada de legumbres sin cocción, lista en 5 min. Las alubias son la base proteica vegetal del viernes."
+      },
+      {
+        type: "Me",
+        time: "17:00 (pre-entreno ~60 min antes)",
+        name: "Tortitas de arroz con plátano y miel 🌟",
+        tags: [],
+        desc: "2 tortitas de arroz\n½ plátano maduro (en rodajas)\n1 cdita miel",
+        note: "Igual que el miércoles. Snack pre-entreno ligero y de digestión rápida."
+      },
+      {
+        type: "Ce",
+        time: "21:00–21:30",
+        name: "Pizza rápida con tortilla de avena",
+        tags: [],
+        desc: "1 tortilla de avena (base)\n2–3 cdas tomate triturado\n60 g mozzarella o mozzarella vegana\nToppings al gusto (ver recetas)\n1 cdita AOVE + orégano",
+        note: "¡Cena estrella del viernes! Ver recetas para 3 versiones: clásica, pesto y veggie BBQ. Se hace en 10 min."
+      }
+    ],
+    batchCooking: null
+  },
+  {
+    short: "Sáb ★",
+    full: "Sábado",
+    sport: "🏆 Día de partido",
+    sportClass: "crossfit",
+    sportBanner: "Competición · ~2.200–2.400 kcal · ~100 g proteína · Máximo combustible",
+    suppl: null,
+    libre: true,
+    meals: [
+      {
+        type: "D",
+        time: "8:00–9:00",
+        name: "Batido rápido de avena + tortitas de arroz",
+        tags: [],
+        desc: "1 vaso bebida vegetal + ½ taza avena + frutos rojos congelados (batido)\n2 tortitas de arroz con mermelada sin azúcar",
+        note: "Desayuno ligero y de fácil digestión. No cargar el estómago si hay partido de mañana o mediodía."
+      },
+      {
+        type: "A",
+        time: "30 min antes del partido",
+        name: "Snack pre-partido ⚡",
+        tags: [],
+        desc: "1 barrita de cereales\n1 plátano maduro",
+        note: "Carga rápida de glucógeno. Plátano y barrita para el sprint inicial. Beber 250–350 ml agua."
+      },
+      {
+        type: "C",
+        time: "Post-partido (2–3 h después)",
+        name: "Recuperación: gazpacho + pollo + patatas",
+        tags: [],
+        desc: "1 bowl gazpacho de tomate (ver receta)\n1 filete grande pollo a la plancha\n2 patatas medianas al horno\n1 pieza de fruta",
+        note: "Comida de recuperación. El gazpacho repone electrolitos y líquidos. El pollo + patatas restauran glucógeno y proteína muscular."
+      },
+      {
+        type: "Me",
+        time: "17:00–17:30",
+        name: "Galletas de avena caseras + yogur",
+        tags: [],
+        desc: "3–4 galletas de avena caseras (ver receta)\n1 yogur de soja natural",
+        note: "Merienda de recuperación post-partido. Las galletas son fáciles de preparar en lote y llevar a donde sea."
+      },
+      {
+        type: "Ce",
+        time: "21:00",
+        name: "🎉 Cena libre",
+        tags: [],
+        desc: "Sin restricciones",
+        libre: true,
+        note: "La cena del sábado está reservada como comida libre. ¡A disfrutar! El resto del día ya ha sido muy completo."
+      }
+    ],
+    batchCooking: null
+  },
+  {
+    short: "Dom",
+    full: "Domingo",
+    sport: "😴 Descanso activo",
+    sportClass: "rest",
+    sportBanner: "Recuperación completa · ~1.900 kcal · ~95 g proteína · Descanso y recarga",
+    suppl: null,
+    libre: false,
+    meals: [
+      {
+        type: "D",
+        time: "9:00–10:00",
+        name: "Tortitas de avena y plátano",
+        tags: [],
+        desc: "1 plátano maduro (100–120 g)\n2 huevos\n3 cdas avena en copos finos (25–30 g)\nCanela al gusto\nFruta fresca o trocitos chocolate negro 70%",
+        note: "Desayuno más relajado del domingo. Ver receta completa. Se puede acompañar con yogur de soja."
+      },
+      {
+        type: "C",
+        time: "14:00–14:30",
+        name: "Potaje de legumbres al gusto",
+        tags: [],
+        desc: "Garbanzos, lentejas o alubias (1 bote o ½ bote)\nVerduras al gusto (zanahoria, cebolla, puerro, espinacas)\nPatata opcional\nCaldo vegetal + especias\n1 cda AOVE",
+        note: "El guiso vegetal del domingo. Sin hervido (aversión). Usar legumbres ya cocidas en bote para facilitar. Puede prepararse abundante para tener tupper del lunes."
+      },
+      {
+        type: "Me",
+        time: "17:00–17:30",
+        name: "Bowl de frutas variadas + frutos secos",
+        tags: [],
+        desc: "2–3 frutas cortadas en cubos (fresas, kiwi, mango, melón...)\n1 puñadito frutos secos\n1 cdita miel opcional",
+        note: "Merienda refrescante y variada. Máxima variedad de fruta para aprovechar el domingo."
+      },
+      {
+        type: "Ce",
+        time: "21:00–21:30",
+        name: "Ensalada verde + huevo cocido + pan integral",
+        tags: [],
+        desc: "Base de rúcula, canónigos o espinacas\n2 huevos cocidos\nTomate cherry + pepino + maíz\n1 rebanada pan integral\n1 cda AOVE + vinagre de módena",
+        note: "Cena ligera de cierre de semana. Recordatorio: preparar overnight oats para el desayuno del lunes."
+      }
+    ],
+    batchCooking: null
+  }
+];
+
+const shopCategories = [
+  {
+    label: "🥩 Proteínas",
+    cls: "cat-prot",
+    items: [
+      { name: "Pechuga de pollo", qty: "600–700 g" },
+      { name: "Fiambre de pavo >90%", qty: "200 g" },
+      { name: "Jamón cocido", qty: "150 g" },
+      { name: "Atún al natural (latas)", qty: "3–4 latas" },
+      { name: "Merluza o filete pescado blanco", qty: "2–3 raciones" },
+      { name: "Yogur de soja natural", qty: "6–7 unidades" },
+      { name: "Huevos camperos o ecológicos", qty: "1 docena" },
+      { name: "Queso fresco batido o queso fresco", qty: "200 g" },
+      { name: "Lentejas cocidas (bote)", qty: "1–2 botes" },
+      { name: "Garbanzos cocidos (bote)", qty: "1–2 botes" },
+      { name: "Alubias blancas cocidas (bote)", qty: "1 bote" }
+    ]
+  },
+  {
+    label: "🌾 Carbohidratos",
+    cls: "cat-carb",
+    items: [
+      { name: "Avena en copos finos", qty: "500 g" },
+      { name: "Pasta integral", qty: "400 g" },
+      { name: "Arroz integral", qty: "500 g" },
+      { name: "Pan integral (bimbo tostadas + barra)", qty: "1 de cada" },
+      { name: "Tortitas de arroz", qty: "1–2 paquetes" },
+      { name: "Tortillas integrales o de avena", qty: "1 paquete" },
+      { name: "Patatas medianas", qty: "8–10 unidades" },
+      { name: "Patatas ya hervidas en bote", qty: "1 bote" },
+      { name: "Barrita de cereales (partido)", qty: "2 unidades" },
+      { name: "Granola sin azúcares añadidos", qty: "300 g" },
+      { name: "Cuscús cocido (tipo SABROZ)", qty: "1 paquete" },
+      { name: "Picatostes", qty: "1 bolsa pequeña" },
+      { name: "Mermelada 0% / sin azúcar", qty: "1 bote" },
+      { name: "Frutas variadas (10–15 piezas)", qty: "Variadas" },
+      { name: "Plátanos maduros", qty: "5–6 unidades" },
+      { name: "Frutos rojos congelados", qty: "400 g" }
+    ]
+  },
+  {
+    label: "🥑 Grasas",
+    cls: "cat-fat",
+    items: [
+      { name: "Aceite de oliva virgen extra (AOVE)", qty: "1 botella" },
+      { name: "Aguacates", qty: "2–3 unidades" },
+      { name: "Mix de frutos secos (nueces, almendras)", qty: "200 g" },
+      { name: "Mix de semillas (chía, lino, girasol)", qty: "200 g" },
+      { name: "Pesto (o pesto vegano)", qty: "1 tarro" },
+      { name: "Piñones (opcional)", qty: "50 g" },
+      { name: "Aceitunas negras en rodajas", qty: "1 lata pequeña" }
+    ]
+  },
+  {
+    label: "🛒 Extras",
+    cls: "cat-extra",
+    items: [
+      { name: "Bebida vegetal (avena, soja o almendra)", qty: "2–3 litros" },
+      { name: "Tomate triturado o salsa de tomate", qty: "3–4 bricks" },
+      { name: "Miel", qty: "1 bote pequeño" },
+      { name: "Mozzarella (fresca o vegana)", qty: "250 g" },
+      { name: "Albahaca fresca", qty: "1 maceta/bolsa" },
+      { name: "Caldo vegetal", qty: "1–2 briks" },
+      { name: "Espinacas frescas o brotes verdes", qty: "200 g" },
+      { name: "Champiñones", qty: "200 g" },
+      { name: "Brócoli", qty: "1 cabeza" },
+      { name: "Pimientos (rojo, verde)", qty: "2–3 unidades" },
+      { name: "Cebolla morada y blanca", qty: "3–4 unidades" },
+      { name: "Tomates maduros + cherry", qty: "1 kg + 250 g" },
+      { name: "Pepino, calabacín, berenjena", qty: "1 de cada" },
+      { name: "Zanahoria, puerro", qty: "4–5 unidades" },
+      { name: "Orégano, comino, pimentón, canela", qty: "Especias" },
+      { name: "Salsa BBQ (para pizza veggie)", qty: "1 bote pequeño" },
+      { name: "Maíz en conserva", qty: "1 lata" },
+      { name: "Vinagre de módena o jerez", qty: "1 botella" },
+      { name: "Cacao puro en polvo", qty: "1 bote" }
+    ]
+  }
+];
+
+const recetas = [
+  {
+    emoji: "🌙",
+    nombre: "Overnight Oats",
+    tiempo: "⏱ 5 min + reposo nocturno",
+    raciones: "🍽 1 persona",
+    utensilios: "🥣 Tarro hermético",
+    ingredientes: [
+      "½ taza copos de avena (40 g)",
+      "250 ml bebida vegetal (avena, soja o almendra)",
+      "1 yogur de soja natural (125 g)",
+      "1 cda semillas (chía, lino...)",
+      "1 cda miel o mermelada",
+      "Fruta al gusto (plátano, frutos rojos, kiwi...)"
+    ],
+    pasos: [
+      "En un tarro o recipiente hermético, mezcla la avena, la bebida vegetal, el yogur y las semillas.",
+      "Añade la miel o mermelada y mezcla bien.",
+      "Incorpora la fruta al gusto (encima o mezclada).",
+      "Tapa y deja reposar en la nevera toda la noche.",
+      "Por la mañana, remueve y disfruta frío o ligeramente templado."
+    ],
+    tip: "💡 Varía el sabor cada día: añade canela y plátano, o cacao puro y frutos rojos. Se conserva 2–3 días en nevera."
+  },
+  {
+    emoji: "🥞",
+    nombre: "Tortitas de Avena y Plátano",
+    tiempo: "⏱ 15 min",
+    raciones: "🍽 1 persona (4–5 tortitas)",
+    utensilios: "🍳 Sartén antiadherente",
+    ingredientes: [
+      "1 plátano maduro (100–120 g)",
+      "2 huevos",
+      "3 cdas avena en copos finos o molida (25–30 g)",
+      "Canela al gusto",
+      "Fruta fresca o trocitos chocolate negro 70% (opcional)"
+    ],
+    pasos: [
+      "Tritura el plátano con un tenedor hasta obtener puré.",
+      "Añade los huevos, la avena y la canela. Mezcla bien hasta integrar.",
+      "Calienta una sartén antiadherente a fuego medio con unas gotas de AOVE.",
+      "Vierte pequeñas porciones de masa (como tortitas pequeñas).",
+      "Cocina 1–2 minutos por lado hasta que estén doradas y firmes.",
+      "Sirve con fruta fresca, miel o un poco de chocolate negro rallado."
+    ],
+    tip: "💡 Cuanto más maduro el plátano, más dulces y esponjosas quedan. Se pueden congelar ya hechas."
+  },
+  {
+    emoji: "🍪",
+    nombre: "Galletas de Avena Caseras",
+    tiempo: "⏱ 20 min (10 min horno)",
+    raciones: "🍽 6–8 galletas",
+    utensilios: "🔥 Horno + bandeja",
+    ingredientes: [
+      "1 plátano maduro (100–120 g)",
+      "1 taza copos de avena (80 g)",
+      "1 cda mantequilla de cacahuete (100% cacahuete)",
+      "Canela al gusto",
+      "Opcional: pepitas de chocolate negro, nueces, semillas"
+    ],
+    pasos: [
+      "Precalienta el horno a 180 °C.",
+      "Machaca el plátano con un tenedor en un bol.",
+      "Añade la avena, la mantequilla de cacahuete y la canela. Mezcla bien.",
+      "Si quieres, incorpora pepitas de chocolate o frutos secos.",
+      "Forma bolitas y aplánalas sobre papel de horno en la bandeja.",
+      "Hornea 10–12 minutos hasta que estén doradas.",
+      "Deja enfriar antes de comer: se endurecen al enfriarse."
+    ],
+    tip: "💡 Perfectas para llevar al instituto o al partido. Se conservan 3–4 días en tarro hermético."
+  },
+  {
+    emoji: "🌯",
+    nombre: "Fajitas de Pollo",
+    tiempo: "⏱ 20 min",
+    raciones: "🍽 1–2 personas",
+    utensilios: "🍳 Sartén o wok",
+    ingredientes: [
+      "1 pechuga de pollo fileteada",
+      "½ pimiento rojo en tiras",
+      "½ pimiento verde en tiras",
+      "½ cebolla en juliana",
+      "2 tortillas integrales o de avena",
+      "1 aguacate en dados o 1 yogur de soja",
+      "1 cdita pimentón ahumado",
+      "1 cdita comino molido",
+      "Sal, AOVE"
+    ],
+    pasos: [
+      "Filetea el pollo y marina con pimentón, comino y sal 5–10 min.",
+      "Calienta la sartén con AOVE a fuego medio-alto y cocina el pollo 5–6 min hasta dorar.",
+      "Reserva el pollo y en la misma sartén saltea cebolla y pimientos 4–5 min.",
+      "Calienta las tortillas en la sartén o microondas 30 segundos.",
+      "Monta las fajitas: pollo + pimientos + cebolla + aguacate.",
+      "Dobla y sirve caliente."
+    ],
+    tip: "💡 Para más jugosidad, añade unas gotas de zumo de lima. Se puede sustituir el aguacate por yogur de soja natural que hace de 'crema agria' vegetal."
+  },
+  {
+    emoji: "🍅",
+    nombre: "Gazpacho de Tomate (con toque de remolacha oculta)",
+    tiempo: "⏱ 15 min + 1h nevera",
+    raciones: "🍽 4 raciones",
+    utensilios: "🥣 Batidora + colador",
+    ingredientes: [
+      "1 kg tomates maduros",
+      "1 remolacha cocida pequeña (50 g — ¡no se nota el sabor!)",
+      "½ pepino pelado",
+      "½ pimiento verde",
+      "1 diente de ajo pequeño (opcional)",
+      "2 cdas AOVE",
+      "1 cda vinagre de jerez",
+      "Sal y agua fría"
+    ],
+    pasos: [
+      "Lava y trocea todos los ingredientes.",
+      "Tritura en batidora a máxima potencia 1–2 minutos.",
+      "Cuela para obtener textura fina y sin pieles.",
+      "Añade agua fría hasta conseguir la textura deseada.",
+      "Rectifica de sal y vinagre.",
+      "Refrigera mínimo 1 hora. Servir muy frío."
+    ],
+    tip: "💡 La remolacha da color intenso y aporta nitratos que mejoran el rendimiento deportivo, pero en esta cantidad su sabor queda completamente enmascarado por el tomate. ¡Pruébalo! Si aún así no convence, hacer sin remolacha y añadir un poco de pimiento rojo para el color."
+  },
+  {
+    emoji: "🍕",
+    nombre: "Pizza Rápida con Base de Tortilla de Avena (3 versiones)",
+    tiempo: "⏱ 10–15 min",
+    raciones: "🍽 1 pizza",
+    utensilios: "🔥 Horno o air fryer",
+    ingredientes: [
+      "1 tortilla de avena (comprada o casera)",
+      "— VERSIÓN CLÁSICA: 2–3 cdas tomate triturado · 60 g mozzarella · aceitunas · albahaca fresca · AOVE",
+      "— VERSIÓN PESTO: 2 cdas pesto · champiñones laminados · rúcula · piñones · AOVE",
+      "— VERSIÓN VEGGIE BBQ: 2 cdas salsa BBQ · 50–70 g tofu firme marinado · pimiento · cebolla roja · maíz"
+    ],
+    pasos: [
+      "Precalienta el horno o air fryer a 200 °C.",
+      "Extiende la base (tomate, pesto o BBQ) sobre la tortilla de avena.",
+      "Coloca los ingredientes según la versión elegida.",
+      "Añade 1 cdita de AOVE, sal y orégano (en versión clásica).",
+      "Hornea 6–8 min hasta que el queso funda (clásica) o los bordes doren.",
+      "Añade ingredientes frescos al sacar (albahaca, rúcula, piñones)."
+    ],
+    tip: "💡 La versión pesto es la más rápida. Para la BBQ veggie, marinar el tofu con soja y pimentón 10 min antes da muchísimo más sabor."
+  }
+];
+
+function badgeClass(type, libre) {
+  if (libre) return "badge-libre";
+  const map = { D:"badge-d", A:"badge-a", Me:"badge-me", C:"badge-c", Ce:"badge-ce" };
+  return map[type] || "badge-c";
+}
+function badgeLabel(type, libre) {
+  if (libre) return "Libre";
+  const map = { D:"Desayuno", A:"Almuerzo", Me:"Merienda", C:"Comida", Ce:"Cena" };
+  return map[type] || type;
+}
+
+let current = 0;
+
+function render() {
+  const d = days[current];
+  let html = `<div style="font-size:18px;font-weight:500;color:#111;margin-bottom:8px">${d.full}</div>`;
+  html += `<div class="pn-sport-banner ${d.sportClass}">${d.sport} — ${d.sportBanner}</div>`;
+  if (d.libre) html += `<div class="pn-libre-banner">La cena de este día está reservada como comida libre (10%). El resto del día mantiene la base nutricional habitual.</div>`;
+  if (d.suppl) html += `<div class="pn-supp-banner">` + d.suppl.replace(/\n/g,"<br>") + `</div>`;
+  if (d.batchCooking) {
+    const bc = d.batchCooking;
+    const items = bc.items.map(i => `<li>${i}</li>`).join("");
+    html += `<div class="pn-batch-section"><h3>${bc.title}</h3><ul>${items}</ul><div class="bc-note">⏱ ${bc.note}</div></div>`;
+  }
+  html += `<div class="pn-meals">`;
+  d.meals.forEach(m => {
+    const bc = badgeClass(m.type, m.libre);
+    const bl = badgeLabel(m.type, m.libre);
+    let tagsHtml = "";
+    if (m.tags && m.tags.includes("extra")) tagsHtml += `<span class="pn-extra-tag">🥡 Hacer cantidad extra</span> `;
+    if (m.tags && m.tags.includes("batch")) tagsHtml += `<span class="pn-batch-tag">♻️ Usar del batch cooking</span> `;
+    const rawParts = m.desc.split(/\n/).map(s => s.trim()).filter(s => s.length > 0);
+    const ingsText = rawParts.join(" + ");
+    let ingsHtml = `<span class="pn-ing pn-ing-full">${ingsText}</span>`;
+    html += `
+      <div class="pn-card">
+        <div class="pn-meal-header">
+          <span class="pn-badge ${bc}">${bl}</span>
+          <span class="pn-time">${m.time}</span>
+        </div>
+        ${tagsHtml ? `<div style="margin-bottom:6px">${tagsHtml}</div>` : ""}
+        <div class="pn-name">${m.name}</div>
+        <div class="pn-ing-list">${ingsHtml}</div>
+        <div class="pn-note">Adaptación: ${m.note}</div>
+      </div>`;
+  });
+  html += `</div>`;
+  document.getElementById("dayView").innerHTML = html;
+}
+
+function buildTabs() {
+  const container = document.getElementById("dayTabs");
+  days.forEach((d, i) => {
+    const btn = document.createElement("button");
+    btn.className = "pn-day-btn" + (i === 0 ? " active" : "");
+    btn.textContent = d.short;
+    btn.onclick = () => {
+      document.querySelectorAll(".pn-day-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      current = i;
+      render();
+    };
+    container.appendChild(btn);
+  });
+}
+
+let shopCurrent = 0;
+
+function renderShop() {
+  const cat = shopCategories[shopCurrent];
+  let html = '<div class="pn-shop-list">';
+  cat.items.forEach(item => {
+    html += `<div class="pn-shop-item ${cat.cls}" onclick="this.classList.toggle('done')">
+      <div class="pn-shop-item-name">${item.name}</div>
+      <div class="pn-shop-item-qty">${item.qty}</div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById("shopView").innerHTML = html;
+}
+
+function buildShopTabs() {
+  const container = document.getElementById("shopTabs");
+  shopCategories.forEach((cat, i) => {
+    const btn = document.createElement("button");
+    btn.className = "pn-shop-btn " + cat.cls + (i === 0 ? " active" : "");
+    btn.textContent = cat.label;
+    btn.onclick = () => {
+      document.querySelectorAll(".pn-shop-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      shopCurrent = i;
+      renderShop();
+    };
+    container.appendChild(btn);
+  });
+}
+
+function buildRecetas() {
+  if (typeof recetas === "undefined" || !recetas.length) return;
+  const container = document.getElementById("recetasList");
+  if (!container) return;
+  recetas.forEach((r, i) => {
+    const div = document.createElement("div");
+    div.className = "pn-receta";
+    div.innerHTML = `
+      <div class="pn-receta-header" onclick="toggleReceta(${i})">
+        <div class="pn-receta-title">${r.emoji} ${r.nombre}</div>
+        <span class="pn-receta-arrow">▸</span>
+      </div>
+      <div class="pn-receta-body">
+        <div class="pn-receta-meta">
+          <span class="pn-receta-meta-pill">${r.tiempo}</span>
+          <span class="pn-receta-meta-pill">${r.raciones}</span>
+          <span class="pn-receta-meta-pill">${r.utensilios}</span>
+        </div>
+        <div class="pn-receta-section">🧺 Ingredientes</div>
+        <div class="pn-receta-ings">${r.ingredientes.map(ing => `<span class="pn-receta-ing">${ing}</span>`).join("")}</div>
+        <div class="pn-receta-section">👨‍🍳 Elaboración</div>
+        <ol class="pn-receta-steps">${r.pasos.map((p,n) => `<li class="pn-receta-step"><span class="pn-receta-step-num">${n+1}</span><span>${p}</span></li>`).join("")}</ol>
+        <div class="pn-receta-tip">${r.tip}</div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function toggleReceta(i) {
+  document.querySelectorAll(".pn-receta")[i].classList.toggle("open");
+}
+
+function imprimirResumen() {
+  window.print();
+}
+
+buildTabs();
+render();
+buildShopTabs();
+renderShop();
+buildRecetas();
+</script>
+
+</body>
+</html>
